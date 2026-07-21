@@ -32,7 +32,7 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 | Service | Image | Ports | Dépend de |
 |---|---|---|---|
 | `postgres` | `postgres:16` | `15432:5432` | — |
-| `keycloak` | `quay.io/keycloak/keycloak:25.0` | `18082:8080` | `postgres` |
+| `keycloak` | `quay.io/keycloak/keycloak:25.0` (production + import realm) | `18082:8080` | `postgres` |
 | `app` | build local | `18090:8080` | `postgres`, `keycloak` |
 | `nginx` | `nginx:alpine` | `18088:80`, `18443:443` | `app`, `keycloak` |
 
@@ -67,3 +67,4 @@ docker compose up -d --build app
 | `pgdata` | `/var/lib/postgresql/data` | Données PostgreSQL |
 | `./certs` | `/etc/nginx/certs` | Certificats SSL |
 | `./nginx.conf` | `/etc/nginx/conf.d/default.conf` | Configuration Nginx |
+| `./realm-config` | `/opt/keycloak/data/import` | Import automatique du realm Keycloak |

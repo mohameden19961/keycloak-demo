@@ -13,7 +13,7 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:25.0
-    command: start-dev
+    command: start --import-realm
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
@@ -21,11 +21,13 @@ services:
       KC_DB_PASSWORD: ${KC_DB_PASSWORD}
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      # Variables recommandées pour le reverse proxy
       KC_HOSTNAME: https://localhost:18443
       KC_HOSTNAME_STRICT: "false"
       KC_PROXY_HEADERS: xforwarded
       KC_HTTP_ENABLED: "true"
+      KC_HTTPS_PORT: 18443
+    volumes:
+      - ./realm-config:/opt/keycloak/data/import:ro
     depends_on:
       - postgres
     ports:
@@ -39,6 +41,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       # L'application contacte Keycloak en interne pour valider l'Issuer
       KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/Taks/protocol/openid-connect/certs
+      KEYCLOAK_INTERNAL_URL: http://keycloak:8080
     depends_on:
       - postgres
       - keycloak

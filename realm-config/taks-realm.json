@@ -1,0 +1,78 @@
+{
+  "realm": "Taks",
+  "displayName": "Task Manager",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "registrationEmailAsUsername": false,
+  "loginWithEmailAllowed": true,
+  "resetPasswordAllowed": true,
+  "defaultRoles": ["USER"],
+  "roles": {
+    "realm": [
+      {
+        "name": "USER",
+        "description": "Utilisateur standard",
+        "composite": false,
+        "clientRole": false
+      },
+      {
+        "name": "ADMIN",
+        "description": "Administrateur",
+        "composite": false,
+        "clientRole": false
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "task-api",
+      "name": "Task API",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [],
+      "webOrigins": ["*"],
+      "defaultClientScopes": ["web-origins", "acr", "roles", "profile", "email"],
+      "optionalClientScopes": ["address", "phone", "offline_access", "microprofile-jwt"]
+    }
+  ],
+  "users": [
+    {
+      "username": "user1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "User",
+      "lastName": "One",
+      "email": "user1@test.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "password123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["USER"]
+    },
+    {
+      "username": "admin1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "One",
+      "email": "admin1@test.com",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["ADMIN", "USER"]
+    }
+  ]
+}

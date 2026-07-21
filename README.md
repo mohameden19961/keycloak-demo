@@ -43,7 +43,15 @@ docker-compose up -d --build
 | GET | `/api/tasks` | JWT | Lister les tâches |
 | POST | `/api/tasks` | JWT | Créer une tâche |
 | DELETE | `/api/tasks/{id}` | JWT (owner) | Supprimer sa tâche |
+| POST | `/api/auth/register` | Aucune | Créer un compte utilisateur |
 | DELETE | `/api/admin/tasks/{id}` | ADMIN | Supprimer toute tâche |
+
+## Utilisateurs pré-configurés
+
+| Utilisateur | Mot de passe | Rôles |
+|---|---|---|
+| `user1` | `password123` | USER |
+| `admin1` | `admin123` | ADMIN, USER |
 
 ## CI/CD
 

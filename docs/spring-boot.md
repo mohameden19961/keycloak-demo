@@ -30,10 +30,18 @@ spring.jpa.hibernate.ddl-auto: update
 spring.security.oauth2.resourceserver.jwt.jwk-set-uri: ${KEYCLOAK_JWK_SET_URI}
 ```
 
+### Keycloak Admin (inscription)
+
+`KeycloakAdminService.java` utilise l'Admin REST API de Keycloak pour créer des utilisateurs :
+
+1. Obtient un token admin via le realm `master` (client `admin-cli`)
+2. Crée l'utilisateur dans le realm `Taks` avec le rôle `USER` (par défaut)
+
 ### Sécurité
 
 `SecurityConfig.java` :
 - Endpoints `/api/public/**` accessibles sans auth
+- Endpoints `/api/auth/**` accessibles sans auth (inscription)
 - Endpoints `/api/admin/**` réservés au rôle `ADMIN`
 - Tous les autres endpoints nécessitent un JWT valide
 - Les rôles Keycloak sont extraits du claim `realm_access.roles`
@@ -43,6 +51,7 @@ spring.security.oauth2.resourceserver.jwt.jwk-set-uri: ${KEYCLOAK_JWK_SET_URI}
 | Méthode | Endpoint | Contrôle d'accès |
 |---|---|---|
 | `GET` | `/api/public/health` | Public |
+| `POST` | `/api/auth/register` | Public |
 | `GET` | `/api/tasks` | Authentifié |
 | `POST` | `/api/tasks` | Authentifié (owner = JWT subject) |
 | `DELETE` | `/api/tasks/{id}` | Owner uniquement |
