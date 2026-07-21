@@ -1,0 +1,372 @@
+{
+  "info": {
+    "_postman_id": "ccb58144-d489-4f98-aa6a-4c0c26f7bab4",
+    "name": "Task API",
+    "description": "Collection pour tester l'application Spring Boot + Keycloak",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "connnection",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "client_id",
+              "value": "test-client"
+            },
+            {
+              "key": "client_secret",
+              "value": "{{client_secret}}"
+            },
+            {
+              "key": "grant_type",
+              "value": "password"
+            },
+            {
+              "key": "username",
+              "value": "{{username}}"
+            },
+            {
+              "key": "password",
+              "value": "{{password}}"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{keycloak_url}}/realms/Taks/protocol/openid-connect/token",
+          "host": [
+            "{{keycloak_url}}"
+          ],
+          "path": [
+            "realms",
+            "Taks",
+            "protocol",
+            "openid-connect",
+            "token"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "(function () {",
+              "  const data = pm.response.json();\n    pm.collectionVariables.set('access_token', data.access_token);\n    pm.collectionVariables.set('refresh_token', data.refresh_token);\n    pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "})();"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{app_url}}/api/public/health",
+          "host": [
+            "{{app_url}}"
+          ],
+          "path": [
+            "api",
+            "public",
+            "health"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "(function () {",
+              "  pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "})();"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "Create Task",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Apprendre Keycloak\",\n  \"done\": false\n}"
+        },
+        "url": {
+          "raw": "{{app_url}}/api/tasks",
+          "host": [
+            "{{app_url}}"
+          ],
+          "path": [
+            "api",
+            "tasks"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "(function () {",
+              "  const data = pm.response.json();\n    pm.collectionVariables.set('task_id', data.id);\n    pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "})();"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "Get All Tasks",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{app_url}}/api/tasks",
+          "host": [
+            "{{app_url}}"
+          ],
+          "path": [
+            "api",
+            "tasks"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "(function () {",
+              "  pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "})();"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "Delete Task",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{access_token}}"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{app_url}}/api/admin/tasks/{{task_id}}",
+          "host": [
+            "{{app_url}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "tasks",
+            "{{task_id}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "(function () {",
+              "  pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "})();"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "refrech token",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "client_id",
+              "value": "test-client"
+            },
+            {
+              "key": "client_secret",
+              "value": "{{client_secret}}"
+            },
+            {
+              "key": "grant_type",
+              "value": "refresh_token"
+            },
+            {
+              "key": "refresh_token",
+              "value": "{{refresh_token}}"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{keycloak_url}}/realms/Taks/protocol/openid-connect/token",
+          "host": [
+            "{{keycloak_url}}"
+          ],
+          "path": [
+            "realms",
+            "Taks",
+            "protocol",
+            "openid-connect",
+            "token"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "(function () {",
+              "  const data = pm.response.json();\n    pm.collectionVariables.set('access_token', data.access_token);\n    pm.collectionVariables.set('refresh_token', data.refresh_token);\n    pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "})();"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "logout",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "client_id",
+              "value": "test-client"
+            },
+            {
+              "key": "client_secret",
+              "value": "{{client_secret}}"
+            },
+            {
+              "key": "refresh_token",
+              "value": "{{refresh_token}}"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{keycloak_url}}/realms/Taks/protocol/openid-connect/logout",
+          "host": [
+            "{{keycloak_url}}"
+          ],
+          "path": [
+            "realms",
+            "Taks",
+            "protocol",
+            "openid-connect",
+            "logout"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "(function () {",
+              "  pm.test('Status is 204', () => pm.response.to.have.status(204));",
+              "})();"
+            ]
+          }
+        }
+      ],
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "app_url",
+      "value": "http://localhost:18090"
+    },
+    {
+      "key": "keycloak_url",
+      "value": "http://localhost:18082"
+    },
+    {
+      "key": "client_secret",
+      "value": "L6vwC1ggXuUzPDaJGafPVFktiAijcBzA"
+    },
+    {
+      "key": "username",
+      "value": "24068@supnum.mr"
+    },
+    {
+      "key": "password",
+      "value": "admin1234"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
+      "value": ""
+    },
+    {
+      "key": "task_id",
+      "value": ""
+    }
+  ]
+}

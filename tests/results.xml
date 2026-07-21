@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Task API" tests="7" time="3.766">
+  <testsuite name="connnection" id="c58523e4-e0e7-473c-9ad3-954e15c76e8c" timestamp="2026-07-21T11:59:57.388Z" tests="1" failures="0" errors="0" time="1.515">
+    <testcase name="Status is 200" time="1.515" classname="TaskApi"/>
+  </testsuite>
+  <testsuite name="Health Check" id="38d36ff7-499b-44bb-8d85-a324914d8873" timestamp="2026-07-21T11:59:57.388Z" tests="1" failures="0" errors="0" time="1.038">
+    <testcase name="Status is 200" time="1.038" classname="TaskApi"/>
+  </testsuite>
+  <testsuite name="Create Task" id="b64a24a0-48f1-400d-8287-ee53b47ca5e0" timestamp="2026-07-21T11:59:57.388Z" tests="1" failures="0" errors="0" time="0.717">
+    <testcase name="Status is 200" time="0.717" classname="TaskApi"/>
+  </testsuite>
+  <testsuite name="Get All Tasks" id="32d05327-8484-4738-8c57-9698fa28ce15" timestamp="2026-07-21T11:59:57.388Z" tests="1" failures="0" errors="0" time="0.285">
+    <testcase name="Status is 200" time="0.285" classname="TaskApi"/>
+  </testsuite>
+  <testsuite name="Delete Task" id="e63a706e-d307-4504-a7d4-3cc8f16cb0eb" timestamp="2026-07-21T11:59:57.388Z" tests="1" failures="0" errors="0" time="0.109">
+    <testcase name="Status is 200" time="0.109" classname="TaskApi"/>
+  </testsuite>
+  <testsuite name="refrech token" id="98ecc036-1985-4412-8b83-95dbea890d13" timestamp="2026-07-21T11:59:57.388Z" tests="1" failures="0" errors="0" time="0.079">
+    <testcase name="Status is 200" time="0.079" classname="TaskApi"/>
+  </testsuite>
+  <testsuite name="logout" id="27fe6158-e233-4e25-92ec-b6587e5e3bc2" timestamp="2026-07-21T11:59:57.388Z" tests="1" failures="0" errors="0" time="0.023">
+    <testcase name="Status is 204" time="0.023" classname="TaskApi"/>
+  </testsuite>
+</testsuites>
