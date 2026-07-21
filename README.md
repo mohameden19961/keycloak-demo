@@ -21,6 +21,7 @@ API REST sécurisée avec Spring Boot 3 + Keycloak + PostgreSQL, proxyfiée par 
 ```bash
 cp .env.example .env
 # Éditer .env avec vos secrets
+./scripts/generate-certs.sh    # Générer les certificats SSL
 docker-compose up -d --build
 ```
 

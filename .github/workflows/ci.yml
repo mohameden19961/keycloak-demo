@@ -73,6 +73,9 @@ jobs:
           exit-code: 0
           severity: HIGH,CRITICAL
 
+      - name: Generate SSL certs
+        run: ./scripts/generate-certs.sh
+
       - name: Start full stack
         run: |
           cp .env.example .env
