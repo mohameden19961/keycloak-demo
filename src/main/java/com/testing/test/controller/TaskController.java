@@ -2,6 +2,7 @@ package com.testing.test.controller;
 
 import com.testing.test.entity.Task;
 import com.testing.test.repository.TaskRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,12 +25,14 @@ public class TaskController {
     }
 
     @GetMapping("/tasks")
-    public List<Task> list() {
-        return repo.findAll();
+    public List<Task> list(@AuthenticationPrincipal Jwt jwt) {
+        String ownerId = jwt.getClaimAsString("preferred_username");
+        if (ownerId == null) ownerId = jwt.getSubject();
+        return repo.findByOwnerId(ownerId);
     }
 
     @PostMapping("/tasks")
-    public Task create(@RequestBody Task t, @AuthenticationPrincipal Jwt jwt) {
+    public Task create(@Valid @RequestBody Task t, @AuthenticationPrincipal Jwt jwt) {
         String ownerId = jwt.getClaimAsString("preferred_username");
         if (ownerId == null) ownerId = jwt.getSubject();
         t.setOwnerId(ownerId);
@@ -45,6 +48,12 @@ public class TaskController {
             throw new AccessDeniedException("Not your task");
         }
         repo.deleteById(id);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/tasks")
+    public List<Task> listAll() {
+        return repo.findAll();
     }
 
     @PreAuthorize("hasRole('ADMIN')")

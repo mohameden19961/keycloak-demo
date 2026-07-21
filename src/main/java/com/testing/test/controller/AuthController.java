@@ -1,9 +1,12 @@
 package com.testing.test.controller;
 
 import com.testing.test.service.KeycloakAdminService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
@@ -12,9 +15,21 @@ import java.util.Map;
 public class AuthController {
 
     private final KeycloakAdminService adminService;
+    private final RestTemplate restTemplate;
 
-    public AuthController(KeycloakAdminService adminService) {
+    @Value("${keycloak.admin.server-url:http://keycloak:8080}")
+    private String serverUrl;
+
+    @Value("${keycloak.admin.realm:Taks}")
+    private String realm;
+
+    public AuthController(KeycloakAdminService adminService, RestTemplate restTemplate) {
         this.adminService = adminService;
+        this.restTemplate = restTemplate;
+    }
+
+    private String getTokenUrl() {
+        return serverUrl + "/realms/" + realm + "/protocol/openid-connect/token";
     }
 
     @PostMapping("/register")
@@ -25,10 +40,14 @@ public class AuthController {
         String firstName = body.getOrDefault("firstName", username);
         String lastName = body.getOrDefault("lastName", firstName);
 
-        if (username == null || email == null || password == null) {
-            return ResponseEntity.badRequest().body(Map.of(
-                "error", "username, email et password sont requis"
-            ));
+        if (username == null || username.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "username est requis"));
+        }
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "email est requis"));
+        }
+        if (password == null || password.length() < 6) {
+            return ResponseEntity.badRequest().body(Map.of("error", "password doit contenir au moins 6 caractères"));
         }
 
         try {
@@ -39,6 +58,62 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
                 "error", "Erreur lors de la création : " + e.getMessage()
+            ));
+        }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@RequestBody Map<String, String> body) {
+        String refreshToken = body.get("refresh_token");
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "refresh_token est requis"));
+        }
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+            form.add("client_id", "task-api");
+            form.add("grant_type", "refresh_token");
+            form.add("refresh_token", refreshToken);
+
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(form, headers);
+            ResponseEntity<Map> response = restTemplate.exchange(
+                getTokenUrl(), HttpMethod.POST, request, Map.class
+            );
+            return ResponseEntity.ok(response.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                "error", "Refresh token invalide ou expiré"
+            ));
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody Map<String, String> body) {
+        String refreshToken = body.get("refresh_token");
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "refresh_token est requis"));
+        }
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+            form.add("client_id", "task-api");
+            form.add("refresh_token", refreshToken);
+
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(form, headers);
+            restTemplate.exchange(
+                serverUrl + "/realms/" + realm + "/protocol/openid-connect/logout",
+                HttpMethod.POST, request, String.class
+            );
+            return ResponseEntity.ok(Map.of("message", "Déconnexion réussie"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "error", "Erreur lors de la déconnexion"
             ));
         }
     }
