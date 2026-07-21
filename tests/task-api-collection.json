@@ -2,52 +2,28 @@
   "info": {
     "_postman_id": "ccb58144-d489-4f98-aa6a-4c0c26f7bab4",
     "name": "Task API",
-    "description": "Collection pour tester l'application Spring Boot + Keycloak",
+    "description": "Collection Postman pour tester l'API complète : auth (Keycloak), CRUD tâches, admin",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "connnection",
+      "name": "1. Login",
       "request": {
         "method": "POST",
         "header": [],
         "body": {
           "mode": "urlencoded",
           "urlencoded": [
-            {
-              "key": "client_id",
-              "value": "test-client"
-            },
-            {
-              "key": "client_secret",
-              "value": "{{client_secret}}"
-            },
-            {
-              "key": "grant_type",
-              "value": "password"
-            },
-            {
-              "key": "username",
-              "value": "{{username}}"
-            },
-            {
-              "key": "password",
-              "value": "{{password}}"
-            }
+            { "key": "client_id", "value": "task-api" },
+            { "key": "grant_type", "value": "password" },
+            { "key": "username", "value": "{{username}}" },
+            { "key": "password", "value": "{{password}}" }
           ]
         },
         "url": {
           "raw": "{{keycloak_url}}/realms/Taks/protocol/openid-connect/token",
-          "host": [
-            "{{keycloak_url}}"
-          ],
-          "path": [
-            "realms",
-            "Taks",
-            "protocol",
-            "openid-connect",
-            "token"
-          ]
+          "host": ["{{keycloak_url}}"],
+          "path": ["realms", "Taks", "protocol", "openid-connect", "token"]
         }
       },
       "event": [
@@ -56,9 +32,10 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "(function () {",
-              "  const data = pm.response.json();\n    pm.collectionVariables.set('access_token', data.access_token);\n    pm.collectionVariables.set('refresh_token', data.refresh_token);\n    pm.test('Status is 200', () => pm.response.to.have.status(200));",
-              "})();"
+              "const data = pm.response.json();",
+              "pm.collectionVariables.set('access_token', data.access_token);",
+              "pm.collectionVariables.set('refresh_token', data.refresh_token);",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -66,20 +43,14 @@
       "response": []
     },
     {
-      "name": "Health Check",
+      "name": "2. Health Check",
       "request": {
         "method": "GET",
         "header": [],
         "url": {
           "raw": "{{app_url}}/api/public/health",
-          "host": [
-            "{{app_url}}"
-          ],
-          "path": [
-            "api",
-            "public",
-            "health"
-          ]
+          "host": ["{{app_url}}"],
+          "path": ["api", "public", "health"]
         }
       },
       "event": [
@@ -88,9 +59,8 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "(function () {",
-              "  pm.test('Status is 200', () => pm.response.to.have.status(200));",
-              "})();"
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Body is ok', () => pm.response.to.have.body('ok'));"
             ]
           }
         }
@@ -98,37 +68,50 @@
       "response": []
     },
     {
-      "name": "Create Task",
+      "name": "3. Register",
       "request": {
         "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{new_username}}\",\n  \"email\": \"{{new_email}}\",\n  \"password\": \"{{new_password}}\"\n}"
+        },
+        "url": {
+          "raw": "{{app_url}}/api/auth/register",
+          "host": ["{{app_url}}"],
+          "path": ["api", "auth", "register"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 201', () => pm.response.to.have.status(201));"
+            ]
           }
-        ],
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "4. Create Task",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
         "auth": {
           "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{access_token}}"
-            }
-          ]
+          "bearer": [{ "key": "token", "value": "{{access_token}}" }]
         },
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"title\": \"Apprendre Keycloak\",\n  \"done\": false\n}"
+          "raw": "{\n  \"title\": \"Apprendre Keycloak\"\n}"
         },
         "url": {
           "raw": "{{app_url}}/api/tasks",
-          "host": [
-            "{{app_url}}"
-          ],
-          "path": [
-            "api",
-            "tasks"
-          ]
+          "host": ["{{app_url}}"],
+          "path": ["api", "tasks"]
         }
       },
       "event": [
@@ -137,9 +120,10 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "(function () {",
-              "  const data = pm.response.json();\n    pm.collectionVariables.set('task_id', data.id);\n    pm.test('Status is 200', () => pm.response.to.have.status(200));",
-              "})();"
+              "const data = pm.response.json();",
+              "pm.collectionVariables.set('task_id', data.id);",
+              "pm.test('Status 201', () => pm.response.to.have.status(201));",
+              "pm.test('Has id', () => pm.expect(data.id).to.exist);"
             ]
           }
         }
@@ -147,28 +131,18 @@
       "response": []
     },
     {
-      "name": "Get All Tasks",
+      "name": "5. Get My Tasks",
       "request": {
         "method": "GET",
         "header": [],
         "auth": {
           "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{access_token}}"
-            }
-          ]
+          "bearer": [{ "key": "token", "value": "{{access_token}}" }]
         },
         "url": {
           "raw": "{{app_url}}/api/tasks",
-          "host": [
-            "{{app_url}}"
-          ],
-          "path": [
-            "api",
-            "tasks"
-          ]
+          "host": ["{{app_url}}"],
+          "path": ["api", "tasks"]
         }
       },
       "event": [
@@ -177,9 +151,8 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "(function () {",
-              "  pm.test('Status is 200', () => pm.response.to.have.status(200));",
-              "})();"
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Returns array', () => pm.expect(pm.response.json()).to.be.an('array'));"
             ]
           }
         }
@@ -187,30 +160,140 @@
       "response": []
     },
     {
-      "name": "Delete Task",
+      "name": "6. Validation Error (empty title)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "auth": {
+          "type": "bearer",
+          "bearer": [{ "key": "token", "value": "{{access_token}}" }]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"\"\n}"
+        },
+        "url": {
+          "raw": "{{app_url}}/api/tasks",
+          "host": ["{{app_url}}"],
+          "path": ["api", "tasks"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400', () => pm.response.to.have.status(400));",
+              "pm.test('Error message', () => pm.expect(pm.response.json().error).to.include('blank'));"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "7. Refresh Token (API)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{app_url}}/api/auth/refresh",
+          "host": ["{{app_url}}"],
+          "path": ["api", "auth", "refresh"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const data = pm.response.json();",
+              "pm.collectionVariables.set('access_token', data.access_token);",
+              "pm.collectionVariables.set('refresh_token', data.refresh_token);",
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "8. Logout (API)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+        },
+        "url": {
+          "raw": "{{app_url}}/api/auth/logout",
+          "host": ["{{app_url}}"],
+          "path": ["api", "auth", "logout"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "9. Admin List All Tasks",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "auth": {
+          "type": "bearer",
+          "bearer": [{ "key": "token", "value": "{{access_token}}" }]
+        },
+        "url": {
+          "raw": "{{app_url}}/api/admin/tasks",
+          "host": ["{{app_url}}"],
+          "path": ["api", "admin", "tasks"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', () => pm.response.to.have.status(200));",
+              "pm.test('Returns array', () => pm.expect(pm.response.json()).to.be.an('array'));",
+              "pm.test('Admin has MANAGE authority', () => pm.expect(pm.response.code).to.eql(200));"
+            ]
+          }
+        }
+      ],
+      "response": []
+    },
+    {
+      "name": "10. Delete Own Task",
       "request": {
         "method": "DELETE",
         "header": [],
         "auth": {
           "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{access_token}}"
-            }
-          ]
+          "bearer": [{ "key": "token", "value": "{{access_token}}" }]
         },
         "url": {
-          "raw": "{{app_url}}/api/admin/tasks/{{task_id}}",
-          "host": [
-            "{{app_url}}"
-          ],
-          "path": [
-            "api",
-            "admin",
-            "tasks",
-            "{{task_id}}"
-          ]
+          "raw": "{{app_url}}/api/tasks/{{task_id}}",
+          "host": ["{{app_url}}"],
+          "path": ["api", "tasks", "{{task_id}}"]
         }
       },
       "event": [
@@ -219,115 +302,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "(function () {",
-              "  pm.test('Status is 200', () => pm.response.to.have.status(200));",
-              "})();"
-            ]
-          }
-        }
-      ],
-      "response": []
-    },
-    {
-      "name": "refrech token",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "urlencoded",
-          "urlencoded": [
-            {
-              "key": "client_id",
-              "value": "test-client"
-            },
-            {
-              "key": "client_secret",
-              "value": "{{client_secret}}"
-            },
-            {
-              "key": "grant_type",
-              "value": "refresh_token"
-            },
-            {
-              "key": "refresh_token",
-              "value": "{{refresh_token}}"
-            }
-          ]
-        },
-        "url": {
-          "raw": "{{keycloak_url}}/realms/Taks/protocol/openid-connect/token",
-          "host": [
-            "{{keycloak_url}}"
-          ],
-          "path": [
-            "realms",
-            "Taks",
-            "protocol",
-            "openid-connect",
-            "token"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "(function () {",
-              "  const data = pm.response.json();\n    pm.collectionVariables.set('access_token', data.access_token);\n    pm.collectionVariables.set('refresh_token', data.refresh_token);\n    pm.test('Status is 200', () => pm.response.to.have.status(200));",
-              "})();"
-            ]
-          }
-        }
-      ],
-      "response": []
-    },
-    {
-      "name": "logout",
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "urlencoded",
-          "urlencoded": [
-            {
-              "key": "client_id",
-              "value": "test-client"
-            },
-            {
-              "key": "client_secret",
-              "value": "{{client_secret}}"
-            },
-            {
-              "key": "refresh_token",
-              "value": "{{refresh_token}}"
-            }
-          ]
-        },
-        "url": {
-          "raw": "{{keycloak_url}}/realms/Taks/protocol/openid-connect/logout",
-          "host": [
-            "{{keycloak_url}}"
-          ],
-          "path": [
-            "realms",
-            "Taks",
-            "protocol",
-            "openid-connect",
-            "logout"
-          ]
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "(function () {",
-              "  pm.test('Status is 204', () => pm.response.to.have.status(204));",
-              "})();"
+              "pm.test('Status 200', () => pm.response.to.have.status(200));"
             ]
           }
         }
@@ -345,16 +320,24 @@
       "value": "https://localhost:18443"
     },
     {
-      "key": "client_secret",
-      "value": "L6vwC1ggXuUzPDaJGafPVFktiAijcBzA"
-    },
-    {
       "key": "username",
-      "value": "24068@supnum.mr"
+      "value": "user1"
     },
     {
       "key": "password",
-      "value": "admin1234"
+      "value": "password123"
+    },
+    {
+      "key": "new_username",
+      "value": "newuser"
+    },
+    {
+      "key": "new_email",
+      "value": "newuser@test.com"
+    },
+    {
+      "key": "new_password",
+      "value": "pass123"
     },
     {
       "key": "access_token",
