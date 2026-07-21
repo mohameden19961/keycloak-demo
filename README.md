@@ -14,6 +14,7 @@ API REST sécurisée avec Spring Boot 3 + Keycloak + PostgreSQL, proxyfiée par 
 | [SonarQube](docs/sonarqube.md) | Analyse statique de code |
 | [OWASP Dependency Check](docs/owasp.md) | Scan des vulnérabilités des dépendances |
 | [Trivy](docs/trivy.md) | Scan des vulnérabilités des containers |
+| [Docker](docs/docker.md) | Conteneurisation multi-stage + Docker Compose |
 | [Newman](docs/newman.md) | Tests d'intégration API Postman |
 
 ## Démarrage rapide
