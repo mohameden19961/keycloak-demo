@@ -1,6 +1,6 @@
 # Keycloak Demo
 
-API REST sécurisée avec Spring Boot 3 + Keycloak + PostgreSQL, proxyfiée par Nginx, avec pipeline CI/CD Jenkins et GitHub Actions.
+API REST sécurisée avec Spring Boot 3 + Keycloak + PostgreSQL, proxyfiée par Nginx, avec pipeline CI/CD GitHub Actions.
 
 ## Stack
 
@@ -30,20 +30,21 @@ docker-compose up -d --build
 
 | Service | URL | Accès |
 |---|---|---|
-| API | http://localhost:18090/api | Public + JWT |
-| Keycloak | http://localhost:18082 | Admin `/admin` |
-| Nginx HTTP | http://localhost:18088 | Redirection HTTPS |
-| Nginx HTTPS | https://localhost:18443 | Reverse proxy |
+| API (HTTPS) | https://localhost:18443/api | Proxy Nginx |
+| Keycloak Admin | https://localhost:18443/admin | Console d'admin |
+| Nginx HTTP | http://localhost:18088 | Redirection vers HTTPS |
 
 ## API
+
+Documentation complète : [docs/api.md](docs/api.md)
 
 | Méthode | Endpoint | Auth | Description |
 |---|---|---|---|
 | GET | `/api/public/health` | Aucune | Health check |
+| POST | `/api/auth/register` | Aucune | Créer un compte utilisateur |
 | GET | `/api/tasks` | JWT | Lister les tâches |
 | POST | `/api/tasks` | JWT | Créer une tâche |
 | DELETE | `/api/tasks/{id}` | JWT (owner) | Supprimer sa tâche |
-| POST | `/api/auth/register` | Aucune | Créer un compte utilisateur |
 | DELETE | `/api/admin/tasks/{id}` | ADMIN | Supprimer toute tâche |
 
 ## Utilisateurs pré-configurés
@@ -55,8 +56,7 @@ docker-compose up -d --build
 
 ## CI/CD
 
-- **Jenkins** : Pipeline local avec Newman → SonarQube → OWASP → Trivy
-- **GitHub Actions** : Build Maven + Tests + OWASP + Trivy sur chaque push
+- **GitHub Actions** : Build Maven + Tests + OWASP Dependency Check + Trivy + Newman sur chaque push
 
 ## Secrets
 
