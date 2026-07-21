@@ -23,7 +23,7 @@ public class AuthController {
         String email = body.get("email");
         String password = body.get("password");
         String firstName = body.getOrDefault("firstName", username);
-        String lastName = body.getOrDefault("lastName", "");
+        String lastName = body.getOrDefault("lastName", firstName);
 
         if (username == null || email == null || password == null) {
             return ResponseEntity.badRequest().body(Map.of(

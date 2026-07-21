@@ -30,14 +30,18 @@ public class TaskController {
 
     @PostMapping("/tasks")
     public Task create(@RequestBody Task t, @AuthenticationPrincipal Jwt jwt) {
-        t.setOwnerId(jwt.getSubject());
+        String ownerId = jwt.getClaimAsString("preferred_username");
+        if (ownerId == null) ownerId = jwt.getSubject();
+        t.setOwnerId(ownerId);
         return repo.save(t);
     }
 
     @DeleteMapping("/tasks/{id}")
     public void deleteOwn(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
         Task task = repo.findById(id).orElseThrow();
-        if (!task.getOwnerId().equals(jwt.getSubject())) {
+        String ownerId = jwt.getClaimAsString("preferred_username");
+        if (ownerId == null) ownerId = jwt.getSubject();
+        if (!task.getOwnerId().equals(ownerId)) {
             throw new AccessDeniedException("Not your task");
         }
         repo.deleteById(id);

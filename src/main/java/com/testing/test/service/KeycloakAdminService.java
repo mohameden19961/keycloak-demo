@@ -38,22 +38,61 @@ public class KeycloakAdminService {
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        Map<String, Object> user = new java.util.LinkedHashMap<>();
-        user.put("username", username);
-        user.put("email", email);
-        user.put("firstName", firstName);
-        user.put("lastName", lastName);
-        user.put("enabled", true);
-        user.put("emailVerified", true);
-        user.put("credentials", List.of(Map.of(
-            "type", "password",
-            "value", password,
-            "temporary", false
-        )));
+        String body = """
+            {
+                "username": "%s",
+                "email": "%s",
+                "firstName": "%s",
+                "lastName": "%s",
+                "enabled": true,
+                "emailVerified": true,
+                "requiredActions": [],
+                "credentials": [{"type": "password", "value": "%s", "temporary": false}]
+            }
+            """.formatted(username, email, firstName, lastName, password);
 
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(user, headers);
-        restTemplate.exchange(
+        HttpEntity<String> request = new HttpEntity<>(body, headers);
+        ResponseEntity<String> response = restTemplate.exchange(
             serverUrl + "/admin/realms/" + realm + "/users",
+            HttpMethod.POST,
+            request,
+            String.class
+        );
+
+        String location = response.getHeaders().getLocation().toString();
+        String userId = location.substring(location.lastIndexOf("/") + 1);
+
+        assignRealmRole(token, userId, "USER");
+    }
+
+    private void assignRealmRole(String token, String userId, String roleName) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        ResponseEntity<List> rolesResponse = restTemplate.exchange(
+            serverUrl + "/admin/realms/" + realm + "/roles",
+            HttpMethod.GET,
+            new HttpEntity<>(headers),
+            List.class
+        );
+
+        List<Map<String, Object>> roles = rolesResponse.getBody();
+        String roleId = null;
+        for (Map<String, Object> role : roles) {
+            if (roleName.equals(role.get("name"))) {
+                roleId = (String) role.get("id");
+                break;
+            }
+        }
+
+        String roleBody = """
+            [{"id": "%s", "name": "%s"}]
+            """.formatted(roleId, roleName);
+
+        HttpEntity<String> request = new HttpEntity<>(roleBody, headers);
+        restTemplate.exchange(
+            serverUrl + "/admin/realms/" + realm + "/users/" + userId + "/role-mappings/realm",
             HttpMethod.POST,
             request,
             String.class
